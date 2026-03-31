@@ -1,0 +1,110 @@
+version: 2
+
+models:
+  - name: dim_drugs
+    description: Drug product dimension with therapeutic classification and price tier
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: drug_id
+        description: Primary key
+        data_type: integer
+        tests:
+          - unique
+          - not_null
+      - name: ndc_code
+        description: National Drug Code
+        data_type: varchar
+      - name: brand_name
+        description: Market brand name
+        data_type: varchar
+      - name: generic_name
+        description: Generic chemical name
+        data_type: varchar
+      - name: manufacturer
+        description: Drug manufacturer
+        data_type: varchar
+      - name: therapeutic_class_code
+        description: Therapeutic area code
+        data_type: varchar
+      - name: therapeutic_class_name
+        description: Therapeutic area full name
+        data_type: varchar
+      - name: dosage_form
+        description: Drug dosage form
+        data_type: varchar
+      - name: strength
+        description: Drug strength
+        data_type: varchar
+      - name: route_of_administration
+        description: How the drug is administered
+        data_type: varchar
+      - name: approval_date
+        description: FDA approval date
+        data_type: date
+      - name: approval_status
+        description: Current approval status
+        data_type: varchar
+      - name: unit_price_dollars
+        description: Unit price in dollars
+        data_type: numeric
+      - name: price_tier
+        description: Price tier classification (Specialty/Brand/Generic)
+        data_type: varchar
+
+  - name: dim_prescribers
+    description: Prescriber dimension with territory and region
+    columns:
+      - name: prescriber_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_patients
+    description: Patient dimension with age group segmentation
+    columns:
+      - name: patient_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: age_group
+        tests:
+          - accepted_values:
+              values: ['Pediatric', 'Young Adult', 'Middle Age', 'Senior']
+
+  - name: dim_pharmacies
+    description: Pharmacy dimension with specialty flag
+    columns:
+      - name: pharmacy_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_prescriptions
+    description: >
+      Prescription fact table with enriched drug, prescriber, and patient data.
+      Incremental model - only processes new fills on subsequent runs.
+    columns:
+      - name: prescription_id
+        description: Primary key for each fill
+        tests:
+          - unique
+          - not_null
+      - name: total_cost_dollars
+        description: Total prescription cost
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+  - name: fct_adverse_events
+    description: Adverse event fact table with severity scoring and drug details
+    columns:
+      - name: event_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null

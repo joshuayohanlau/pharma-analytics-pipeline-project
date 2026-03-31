@@ -1,0 +1,9 @@
+territory_id,territory_name,region,states
+1,New England,Northeast,"MA,CT,RI,NH,VT,ME"
+2,Tri-State,Northeast,"NY,NJ,PA"
+3,Texas,South,"TX"
+4,Northern California,West,"CA"
+5,Great Lakes,Midwest,"IL,IN,OH,MI,WI"
+6,Florida,South,"FL"
+7,Southeast,South,"GA,NC,SC,TN,AL"
+8,Pacific Northwest,West,"WA,OR"

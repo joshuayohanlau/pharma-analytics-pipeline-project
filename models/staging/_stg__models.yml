@@ -1,0 +1,164 @@
+version: 2
+
+models:
+  - name: stg_drugs
+    description: Cleaned drug product master data with price conversion
+    columns:
+      - name: drug_id
+        description: Primary key from source system
+        tests:
+          - unique
+          - not_null
+      - name: ndc_code
+        description: National Drug Code identifier
+        tests:
+          - not_null
+      - name: brand_name
+        description: Market brand name of the drug
+      - name: therapeutic_class_code
+        description: Therapeutic area classification code
+        tests:
+          - accepted_values:
+              values: ['ENDO', 'CARD', 'ONCO', 'IMMU', 'RESP', 'ANTI', 'NEUR', 'PSYC']
+      - name: unit_price_dollars
+        description: Unit price converted from cents to dollars
+
+  - name: stg_prescriptions
+    description: Cleaned prescription fill records with cost conversions
+    columns:
+      - name: prescription_id
+        description: Primary key for each fill event
+        tests:
+          - unique
+          - not_null
+      - name: drug_id
+        description: Foreign key to drug product
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_drugs')
+              field: drug_id
+      - name: patient_id
+        description: Foreign key to patient
+        tests:
+          - not_null
+      - name: fill_date
+        description: Date the prescription was filled
+        tests:
+          - not_null
+      - name: total_cost_dollars
+        description: Total cost converted from cents to dollars
+
+  - name: stg_prescribers
+    description: Healthcare provider prescriber records with full name
+    columns:
+      - name: prescriber_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: npi_number
+        description: National Provider Identifier
+        tests:
+          - unique
+          - not_null
+      - name: specialty
+        description: Medical specialty of the prescriber
+
+  - name: stg_patients
+    description: Patient demographic data with calculated age
+    columns:
+      - name: patient_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: member_id
+        description: Insurance member identifier
+        tests:
+          - unique
+          - not_null
+      - name: insurance_type
+        description: Type of insurance coverage
+        tests:
+          - accepted_values:
+              values: ['Commercial', 'Medicare', 'Medicaid']
+
+  - name: stg_pharmacies
+    description: Pharmacy location and classification data
+    columns:
+      - name: pharmacy_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: pharmacy_type
+        description: Pharmacy dispensing channel
+        tests:
+          - accepted_values:
+              values: ['retail', 'specialty', 'mail_order']
+
+  - name: stg_adverse_events
+    description: FDA adverse event reports with calculated reporting lag
+    columns:
+      - name: event_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: severity
+        description: Event severity classification
+        tests:
+          - accepted_values:
+              values: ['mild', 'moderate', 'serious']
+      - name: drug_id
+        description: Foreign key to the suspected drug
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_drugs')
+              field: drug_id
+
+  - name: stg_clinical_trials
+    description: Clinical trial registry data with enrollment metrics
+    columns:
+      - name: trial_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: phase
+        description: Clinical trial phase
+        tests:
+          - accepted_values:
+              values: ['I', 'II', 'III', 'IV']
+      - name: status
+        description: Current trial status
+        tests:
+          - accepted_values:
+              values: ['Recruiting', 'Active', 'Completed', 'Terminated', 'Suspended']
+
+  - name: stg_inventory
+    description: Warehouse inventory with availability and reorder flags
+    columns:
+      - name: inventory_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: quantity_available
+        description: On-hand minus reserved units
+
+  - name: stg_sales_reps
+    description: Sales representative roster with territory assignments
+    columns:
+      - name: rep_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: employee_id
+        description: HR employee identifier
+        tests:
+          - unique
+          - not_null

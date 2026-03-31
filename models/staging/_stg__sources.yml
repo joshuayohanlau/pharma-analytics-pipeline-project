@@ -1,0 +1,94 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw pharmaceutical data loaded by the EL pipeline
+    database: pharma_analytics
+    schema: raw
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+    loaded_at_field: loaded_at
+
+    tables:
+      - name: prescriptions
+        description: Individual prescription fill records
+        columns:
+          - name: prescription_id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+
+      - name: adverse_events
+        description: FDA-style adverse event reports (FAERS)
+        columns:
+          - name: event_id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+
+      - name: drugs
+        identifier: drugs
+        description: Drug master data catalog
+        loaded_at_field: updated_at
+        columns:
+          - name: drug_id
+            tests:
+              - unique
+              - not_null
+
+      - name: prescribers
+        description: Healthcare provider prescriber records
+        loaded_at_field: updated_at
+        columns:
+          - name: prescriber_id
+            tests:
+              - unique
+              - not_null
+
+      - name: patients
+        description: Patient demographic data
+        loaded_at_field: updated_at
+        columns:
+          - name: patient_id
+            tests:
+              - unique
+              - not_null
+
+      - name: pharmacies
+        description: Pharmacy location and type data
+        loaded_at_field: updated_at
+        columns:
+          - name: pharmacy_id
+            tests:
+              - unique
+              - not_null
+
+      - name: clinical_trials
+        description: Clinical trial registry and status data
+        loaded_at_field: updated_at
+        columns:
+          - name: trial_id
+            tests:
+              - unique
+              - not_null
+
+      - name: inventory
+        description: Warehouse inventory snapshots
+        loaded_at_field: updated_at
+        columns:
+          - name: inventory_id
+            tests:
+              - unique
+              - not_null
+
+      - name: sales_reps
+        description: Sales representative roster
+        loaded_at_field: updated_at
+        columns:
+          - name: rep_id
+            tests:
+              - unique
+              - not_null

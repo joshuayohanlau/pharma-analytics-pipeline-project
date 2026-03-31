@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: dim_trials
+    description: Clinical trial dimension with enrollment analysis and drug details
+    columns:
+      - name: trial_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_trial_outcomes
+    description: Trial outcomes with linked adverse event counts per drug
+    columns:
+      - name: trial_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null

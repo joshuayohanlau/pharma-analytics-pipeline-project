@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: int_prescription_enriched
+    description: >
+      Prescriptions joined with drug, prescriber, and patient details.
+      Materialized as ephemeral (compiled as a CTE, no table created).
+
+  - name: int_adverse_event_classified
+    description: >
+      Adverse events enriched with drug details and severity scoring.
+      Includes a boolean flag for serious outcomes.
+
+  - name: int_trial_enrollment
+    description: >
+      Clinical trials enriched with drug details and enrollment analysis.
+      Includes enrollment status classification and trial duration.

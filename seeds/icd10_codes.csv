@@ -1,0 +1,12 @@
+icd10_code,description,category
+E11,Type 2 diabetes mellitus,Endocrine
+E11.9,Type 2 diabetes mellitus without complications,Endocrine
+I50,Heart failure,Circulatory
+I50.9,Heart failure unspecified,Circulatory
+C34,Malignant neoplasm of bronchus and lung,Neoplasm
+C50,Malignant neoplasm of breast,Neoplasm
+L40,Psoriasis,Skin
+M05,Rheumatoid arthritis,Musculoskeletal
+J45,Asthma,Respiratory
+L20,Atopic dermatitis,Skin
+I48,Atrial fibrillation and flutter,Circulatory

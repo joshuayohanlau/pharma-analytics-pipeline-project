@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: fct_sales_performance
+    description: Monthly sales performance metrics by territory and rep
+    columns:
+      - name: territory_id
+        description: Territory identifier
+        tests:
+          - not_null
+      - name: total_revenue_dollars
+        description: Total prescription revenue for the territory/month
+
+  - name: rpt_territory_dashboard
+    description: >
+      Aggregated territory performance summary for executive dashboards.
+      Aliased as 'territory_performance_summary' in the warehouse.
+    columns:
+      - name: territory_id
+        tests:
+          - not_null

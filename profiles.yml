@@ -1,0 +1,12 @@
+pharma_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      port: 5432
+      user: postgres
+      password: "{{ env_var('DBT_PG_PASSWORD', 'postgres') }}"
+      dbname: pharma_analytics
+      schema: public
+      threads: 4

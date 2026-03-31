@@ -1,0 +1,16 @@
+ndc_code,brand_name,generic_name,manufacturer,therapeutic_class_code,dosage_form,unit_price_cents
+00002-3227-30,Trulicity,dulaglutide,Eli Lilly,ENDO,injection,95000
+00006-0277-31,Januvia,sitagliptin,Merck,ENDO,tablet,4500
+00074-3799-02,Humira,adalimumab,AbbVie,IMMU,injection,280000
+50580-0506-02,Eliquis,apixaban,Bristol-Myers Squibb,CARD,tablet,1700
+00173-0882-20,Advair Diskus,fluticasone/salmeterol,GSK,RESP,inhalation,42000
+59148-0040-12,Keytruda,pembrolizumab,Merck,ONCO,injection,980000
+00002-4462-01,Verzenio,abemaciclib,Eli Lilly,ONCO,tablet,15500
+00078-0898-61,Entresto,sacubitril/valsartan,Novartis,CARD,tablet,1850
+61755-0006-01,Ozempic,semaglutide,Novo Nordisk,ENDO,injection,105000
+00069-0145-01,Xeljanz,tofacitinib,Pfizer,IMMU,tablet,7800
+00074-0406-02,Rinvoq,upadacitinib,AbbVie,IMMU,tablet,7200
+00002-7515-01,Mounjaro,tirzepatide,Eli Lilly,ENDO,injection,115000
+59353-0001-01,Dupixent,dupilumab,Regeneron/Sanofi,IMMU,injection,340000
+00006-3061-02,Lagevrio,molnupiravir,Merck,ANTI,capsule,7100
+00310-1225-30,Farxiga,dapagliflozin,AstraZeneca,CARD,tablet,1750
