@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pharma Analytics Pipeline — Joshua Lau</title>
+  <meta property="og:title" content="Pharma Analytics Pipeline — Joshua Lau" />
+  <meta property="og:description" content="End-to-end dbt analytics pipeline: 9 source systems, 23 models, 77 automated tests, incremental loads, SCD2 snapshots, model contracts." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://joshuayohanlau.github.io/pharma-analytics-pipeline-project/" />
+  <meta name="description" content="End-to-end analytics engineering pipeline for pharmaceutical data using dbt Core and PostgreSQL. Built by Joshua Lau." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0A0C10;
+      --surface:   #12151B;
+      --surface2:  #181C24;
+      --surface3:  #1E2330;
+      --border:    #1F2937;
+      --border2:   #2A3344;
+      --text:      #F1F5F9;
+      --text2:     #94A3B8;
+      --text3:     #475569;
+      --teal:      #2DD4BF;
+      --teal-dim:  rgba(45,212,191,0.08);
+      --teal-mid:  rgba(45,212,191,0.15);
+      --teal-glow: rgba(45,212,191,0.25);
+      --blue:      #60A5FA;
+      --blue-dim:  rgba(96,165,250,0.08);
+      --purple:    #A78BFA;
+      --purple-dim:rgba(167,139,250,0.08);
+      --amber:     #FBBF24;
+      --amber-dim: rgba(251,191,36,0.08);
+      --red:       #F87171;
+      --red-dim:   rgba(248,113,113,0.08);
+      --green:     #34D399;
+      --green-dim: rgba(52,211,153,0.08);
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'DM Sans', system-ui, sans-serif;
+      --serif:     'DM Serif Display', Georgia, serif;
+      --radius:    10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+
+    /* ───────── NAV ───────── */
+    .nav-outer {
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: rgba(10,12,16,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      opacity: 0; animation: fade 0.4s ease 0.05s forwards;
+    }
+    nav { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; }
+    .nav-left { display: flex; align-items: center; gap: 10px; }
+    .nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal-glow); }
+    .nav-brand { font-size: 13.5px; font-weight: 600; color: var(--text); }
+    .nav-sep { color: var(--text3); margin: 0 2px; }
+    .nav-sub { font-size: 13px; font-weight: 400; color: var(--text2); }
+    .nav-right { display: flex; gap: 10px; align-items: center; }
+    .nav-link { font-size: 12.5px; color: var(--text2); text-decoration: none; padding: 7px 12px; transition: color 0.15s; }
+    .nav-link:hover { color: var(--teal); }
+    .nav-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12.5px; font-weight: 500; text-decoration: none;
+      padding: 7px 14px; border-radius: 6px;
+      border: 1px solid var(--border2); color: var(--text2); background: var(--surface);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-dim); }
+    .nav-btn.primary { background: var(--teal); color: #0A0C10; border-color: var(--teal); font-weight: 600; }
+    .nav-btn.primary:hover { background: #5EEAD4; border-color: #5EEAD4; }
+
+    /* ───────── HERO ───────── */
+    .hero { padding: 80px 0 64px; position: relative; }
+    .hero::after {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(45,212,191,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-meta {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+      opacity: 0; animation: up 0.55s ease 0.15s forwards;
+    }
+    .hero-tag {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal);
+      background: var(--teal-dim); border: 1px solid rgba(45,212,191,0.2);
+      padding: 4px 10px; border-radius: 4px;
+    }
+    .hero-divider { width: 1px; height: 14px; background: var(--border2); }
+    .hero-date { font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: 0.06em; }
+    h1 {
+      font-family: var(--serif); font-size: clamp(44px, 6.5vw, 78px); font-weight: 400;
+      line-height: 1.0; letter-spacing: -0.02em; color: var(--text);
+      margin-bottom: 24px; max-width: 780px;
+      opacity: 0; animation: up 0.6s ease 0.2s forwards;
+    }
+    h1 em { color: var(--teal); font-style: italic; }
+    .hero-desc {
+      font-size: 16.5px; font-weight: 300; color: var(--text2);
+      max-width: 640px; line-height: 1.8; margin-bottom: 36px;
+      opacity: 0; animation: up 0.6s ease 0.25s forwards;
+    }
+    .hero-actions {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      opacity: 0; animation: up 0.6s ease 0.3s forwards;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--teal); color: #0A0C10; font-size: 13.5px; font-weight: 600;
+      padding: 12px 24px; border-radius: 8px; text-decoration: none;
+      transition: all 0.15s; box-shadow: 0 0 20px rgba(45,212,191,0.15);
+    }
+    .btn-primary:hover { background: #5EEAD4; transform: translateY(-1px); box-shadow: 0 0 30px rgba(45,212,191,0.25); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--text2); font-size: 13.5px; font-weight: 500;
+      padding: 12px 24px; border-radius: 8px; border: 1px solid var(--border2);
+      background: var(--surface); text-decoration: none; transition: all 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* ───────── METRICS ───────── */
+    .metrics-outer { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); }
+    .metrics { display: grid; grid-template-columns: repeat(5, 1fr); }
+    .metric {
+      padding: 28px 0; border-right: 1px solid var(--border); text-align: center;
+      opacity: 0; animation: up 0.5s ease forwards;
+    }
+    .metric:last-child { border-right: none; }
+    .metric:nth-child(1) { animation-delay: 0.35s; }
+    .metric:nth-child(2) { animation-delay: 0.40s; }
+    .metric:nth-child(3) { animation-delay: 0.45s; }
+    .metric:nth-child(4) { animation-delay: 0.50s; }
+    .metric:nth-child(5) { animation-delay: 0.55s; }
+    .metric-num { font-family: var(--serif); font-size: 36px; font-weight: 400; line-height: 1; color: var(--text); margin-bottom: 6px; letter-spacing: -0.02em; }
+    .metric-label { font-size: 11.5px; font-weight: 400; color: var(--text2); line-height: 1.4; }
+
+    /* ───────── SECTIONS ───────── */
+    .section { padding: 64px 0; border-bottom: 1px solid var(--border); opacity: 0; animation: up 0.6s ease 0.5s forwards; }
+    .section-head { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+    .section-label { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); white-space: nowrap; }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
+    h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; color: var(--text); letter-spacing: -0.01em; margin-bottom: 10px; }
+    .section-subtitle { font-size: 14.5px; font-weight: 300; color: var(--text2); line-height: 1.7; max-width: 700px; margin-bottom: 32px; }
+
+    /* ───────── SKILLS GRID ───────── */
+    .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .skill-card { background: var(--surface); padding: 28px 30px; transition: background 0.15s; }
+    .skill-card:hover { background: var(--surface2); }
+    .skill-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .skill-icon {
+      width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .skill-icon.teal   { background: var(--teal-dim); color: var(--teal); }
+    .skill-icon.blue   { background: var(--blue-dim); color: var(--blue); }
+    .skill-icon.purple { background: var(--purple-dim); color: var(--purple); }
+    .skill-icon.amber  { background: var(--amber-dim); color: var(--amber); }
+    .skill-icon.green  { background: var(--green-dim); color: var(--green); }
+    .skill-icon.red    { background: var(--red-dim); color: var(--red); }
+    .skill-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .skill-subtitle { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-top: 2px; }
+    .skill-body { font-size: 13px; font-weight: 300; color: var(--text2); line-height: 1.65; }
+    .skill-body strong { font-weight: 500; color: var(--text); }
+
+    /* ───────── PIPELINE ───────── */
+    .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .p-step {
+      background: var(--surface); padding: 24px 20px;
+      border-right: 1px solid var(--border); position: relative; transition: background 0.15s;
+    }
+    .p-step:last-child { border-right: none; }
+    .p-step:hover { background: var(--surface2); }
+    .p-step:hover .p-num-box { background: var(--teal); color: #0A0C10; border-color: var(--teal); }
+    .p-num-box {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 6px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      font-family: var(--mono); font-size: 10px; font-weight: 500;
+      color: var(--text3); margin-bottom: 12px; transition: all 0.15s;
+    }
+    .p-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .p-desc { font-size: 11.5px; font-weight: 300; color: var(--text2); line-height: 1.55; }
+    .p-tag { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 10px; }
+    .p-connector {
+      position: absolute; top: 50%; right: -9px; transform: translateY(-50%);
+      width: 18px; height: 18px; background: var(--bg); border: 1px solid var(--border2);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2;
+    }
+    .p-connector svg { color: var(--text3); }
+    .p-step:last-child .p-connector { display: none; }
+
+    /* ───────── SCHEMA ───────── */
+    .schema { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .s-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 22px; transition: border-color 0.15s, transform 0.15s; overflow: hidden; position: relative;
+    }
+    .s-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .s-card.is-fact::before { background: var(--teal); }
+    .s-card.is-dim::before { background: var(--blue); }
+    .s-card.is-snap::before { background: var(--purple); }
+    .s-card.is-rpt::before { background: var(--amber); }
+    .s-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+    .s-type { font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+    .s-card.is-fact .s-type { color: var(--teal); }
+    .s-card.is-dim .s-type { color: var(--blue); }
+    .s-card.is-snap .s-type { color: var(--purple); }
+    .s-card.is-rpt .s-type { color: var(--amber); }
+    .s-name { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
+    .s-fields { list-style: none; }
+    .s-fields li {
+      font-size: 11.5px; font-weight: 400; color: var(--text2); padding: 5px 0;
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 7px;
+    }
+    .s-fields li:last-child { border-bottom: none; }
+    .s-fields li::before { content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+
+    /* ───────── TABLE ───────── */
+    .data-table {
+      width: 100%; border-collapse: separate; border-spacing: 0;
+      border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+    }
+    .data-table thead { background: var(--surface); }
+    .data-table th {
+      padding: 12px 20px; font-family: var(--mono); font-size: 10px; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3);
+      text-align: left; border-bottom: 1px solid var(--border);
+    }
+    .data-table th:last-child { text-align: right; }
+    .data-table tbody tr { background: var(--surface); transition: background 0.12s; }
+    .data-table tbody tr:hover { background: var(--surface2); }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table td { padding: 13px 20px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+    .td-mono { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--teal); }
+    .td-desc { color: var(--text); font-weight: 400; }
+    .td-num { text-align: right; font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--text); }
+
+    /* ───────── BADGES ───────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10.5px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+    }
+    .badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .badge-teal { background: var(--teal-dim); color: var(--teal); }
+    .badge-teal::before { background: var(--teal); }
+    .badge-blue { background: var(--blue-dim); color: var(--blue); }
+    .badge-blue::before { background: var(--blue); }
+    .badge-purple { background: var(--purple-dim); color: var(--purple); }
+    .badge-purple::before { background: var(--purple); }
+
+    /* ───────── CHIPS ───────── */
+    .stack { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+      font-size: 13px; font-weight: 400; padding: 8px 16px;
+      border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text2); background: var(--surface); transition: border-color 0.15s, color 0.15s;
+    }
+    .chip:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* ───────── FOOTER ───────── */
+    .footer-outer { border-top: 1px solid var(--border); }
+    footer {
+      padding: 28px 0; display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px; opacity: 0; animation: up 0.5s ease 1s forwards;
+    }
+    .footer-left { display: flex; align-items: center; gap: 10px; }
+    .footer-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .footer-role { font-size: 12px; color: var(--text3); }
+    .footer-links { display: flex; gap: 16px; }
+    .footer-link {
+      font-family: var(--mono); font-size: 11.5px; color: var(--text3);
+      text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color 0.15s;
+    }
+    .footer-link:hover { color: var(--teal); }
+
+    /* ───────── ANIMATIONS ───────── */
+    @keyframes up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ───────── RESPONSIVE ───────── */
+    @media (max-width: 900px) {
+      .skills-grid { grid-template-columns: 1fr; }
+      .schema { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .wrap { padding: 0 20px; }
+      h1 { font-size: 38px; }
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .metric:nth-child(3) { border-right: none; }
+      .metric:nth-child(4), .metric:nth-child(5) { border-top: 1px solid var(--border); }
+      .pipeline { grid-template-columns: 1fr; }
+      .p-connector { display: none !important; }
+      .schema { grid-template-columns: 1fr; }
+      .nav-right .nav-link { display: none; }
+      .footer-links { flex-direction: column; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ───────── NAV ───────── -->
+<div class="nav-outer">
+  <div class="wrap">
+    <nav>
+      <div class="nav-left">
+        <div class="nav-dot"></div>
+        <span class="nav-brand">Joshua Lau</span>
+        <span class="nav-sep">/</span>
+        <span class="nav-sub">pharma-analytics-pipeline</span>
+      </div>
+      <div class="nav-right">
+        <a href="#skills" class="nav-link">Skills</a>
+        <a href="#architecture" class="nav-link">Architecture</a>
+        <a href="#data-model" class="nav-link">Data Model</a>
+        <a href="https://github.com/joshuayohanlau/pharma-analytics-pipeline-project" class="nav-btn primary" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          Source Code
+        </a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- ───────── HERO ───────── -->
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-meta">
+      <span class="hero-tag">Analytics Engineering</span>
+      <div class="hero-divider"></div>
+      <span class="hero-date">dbt Core &middot; PostgreSQL &middot; SQL</span>
+    </div>
+    <h1>Pharma Analytics<br/><em>Pipeline</em></h1>
+    <p class="hero-desc">
+      A production-grade data pipeline that transforms raw pharmaceutical data from nine source systems into analytics-ready dimensions and facts. Built with dbt Core, covering every major concept tested on the dbt Analytics Engineering certification.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/joshuayohanlau/pharma-analytics-pipeline-project" class="btn-primary" target="_blank">
+        View Repository
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </a>
+      <a href="https://github.com/joshuayohanlau/pharma-analytics-pipeline-project/blob/main/README.md" class="btn-ghost" target="_blank">Read Documentation</a>
+    </div>
+  </div>
+</div>
+
+<!-- ───────── METRICS ───────── -->
+<div class="metrics-outer">
+  <div class="wrap">
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-num">23</div>
+        <div class="metric-label">dbt Models</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">77</div>
+        <div class="metric-label">Automated Tests</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">9</div>
+        <div class="metric-label">Source Systems</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">4</div>
+        <div class="metric-label">Materialisation Types</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">0</div>
+        <div class="metric-label">Test Failures</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ───────── SKILLS ───────── -->
+  <div class="section" id="skills">
+    <div class="section-head">
+      <span class="section-label">Skills Demonstrated</span>
+      <div class="section-line"></div>
+    </div>
+    <h2>What this project proves I can do</h2>
+    <p class="section-subtitle">Each card maps to a real-world analytics engineering competency. Every skill below is implemented in the codebase, not just described.</p>
+
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-header">
+          <div class="skill-icon teal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div>
+            <div class="skill-title">Incremental Model Design</div>
+            <div class="skill-subtitle">fct_prescriptions.sql</div>
+          </div>
+        </div>
+        <div class="skill-body">Built a fact table using <strong>delete+insert incremental strategy</strong> with is_incremental() filtering. On subsequent runs, only new prescription records are processed — the same pattern used to handle millions of rows in production warehouses.</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-header">
+          <div class="skill-icon purple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <div>
+            <div class="skill-title">SCD Type 2 Snapshots</div>
+            <div class="skill-subtitle">snap_drug_status.sql &middot; snap_inventory_levels.sql</div>
+          </div>
+        </div>
+        <div class="skill-body">Implemented <strong>both snapshot strategies</strong>: timestamp-based tracking for inventory levels and check-based tracking for drug approval status and pricing. dbt manages valid_from / valid_to columns automatically.</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-header">
+          <div class="skill-icon blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <div>
+            <div class="skill-title">Data Quality Testing</div>
+            <div class="skill-subtitle">77 tests across all layers</div>
+          </div>
+        </div>
+        <div class="skill-body"><strong>Generic tests</strong> (unique, not_null, accepted_values, relationships), <strong>singular tests</strong> (custom SQL), <strong>custom generic tests</strong> (reusable macro), and <strong>dbt_utils tests</strong> (accepted_range). Full coverage from sources to marts.</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-header">
+          <div class="skill-icon green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <div class="skill-title">Layered Architecture</div>
+            <div class="skill-subtitle">staging &rarr; intermediate &rarr; marts</div>
+          </div>
+        </div>
+        <div class="skill-body">Three-layer DAG: <strong>9 staging views</strong> (source-conformed), <strong>3 ephemeral intermediate models</strong> (business logic joins), and <strong>10 mart tables</strong> (dimensions + facts). Each layer has a clear purpose and materialisation strategy.</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-header">
+          <div class="skill-icon amber">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+          </div>
+          <div>
+            <div class="skill-title">Jinja & Custom Macros</div>
+            <div class="skill-subtitle">macros/</div>
+          </div>
+        </div>
+        <div class="skill-body">Wrote <strong>reusable Jinja macros</strong>: cents_to_dollars() for currency conversion, generate_surrogate_key() for hash keys, a custom generic test for positive values, and a logging macro for run-event hooks.</div>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-header">
+          <div class="skill-icon red">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div class="skill-title">Model Contracts & Governance</div>
+            <div class="skill-subtitle">_core__models.yml</div>
+          </div>
+        </div>
+        <div class="skill-body"><strong>Enforced column-level contracts</strong> on dim_drugs — the build fails if actual data types don't match the contract. Combined with source freshness checks (warn at 24h, error at 48h), hooks, and full doc() block documentation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── PIPELINE ───────── -->
+  <div class="section" id="architecture">
+    <div class="section-head">
+      <span class="section-label">Pipeline Architecture</span>
+      <div class="section-line"></div>
+    </div>
+    <h2>End-to-end data flow</h2>
+    <p class="section-subtitle">Raw operational data flows through five stages. Each stage has a clear responsibility and a specific dbt materialisation strategy.</p>
+
+    <div class="pipeline">
+      <div class="p-step">
+        <div class="p-num-box">01</div>
+        <div class="p-name">Ingest</div>
+        <div class="p-desc">9 source tables loaded into PostgreSQL raw schema</div>
+        <div class="p-tag">SQL scripts</div>
+        <div class="p-connector"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="p-step">
+        <div class="p-num-box">02</div>
+        <div class="p-name">Stage</div>
+        <div class="p-desc">Clean, derive fields, validate, standardise naming</div>
+        <div class="p-tag">9 views</div>
+        <div class="p-connector"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="p-step">
+        <div class="p-num-box">03</div>
+        <div class="p-name">Enrich</div>
+        <div class="p-desc">Multi-table joins, severity scoring, risk classification</div>
+        <div class="p-tag">3 ephemeral</div>
+        <div class="p-connector"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="p-step">
+        <div class="p-num-box">04</div>
+        <div class="p-name">Model</div>
+        <div class="p-desc">4 dimensions, 4 facts, 1 executive report</div>
+        <div class="p-tag">10 tables</div>
+        <div class="p-connector"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="p-step">
+        <div class="p-num-box">05</div>
+        <div class="p-name">Test & Track</div>
+        <div class="p-desc">77 tests, 2 SCD2 snapshots, source freshness monitoring</div>
+        <div class="p-tag">100% pass</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── SCHEMA ───────── -->
+  <div class="section" id="data-model">
+    <div class="section-head">
+      <span class="section-label">Dimensional Model</span>
+      <div class="section-line"></div>
+    </div>
+    <h2>Star schema output</h2>
+    <p class="section-subtitle">The pipeline produces 4 dimension tables, 4 fact tables, 1 executive report, and 2 SCD Type 2 snapshot tables for historical tracking.</p>
+
+    <div class="schema">
+      <div class="s-card is-fact">
+        <div class="s-type">Fact &middot; Incremental</div>
+        <div class="s-name">fct_prescriptions</div>
+        <ul class="s-fields">
+          <li>prescription_id (PK)</li>
+          <li>drug_id &middot; prescriber_id &middot; patient_id</li>
+          <li>fill_date &middot; quantity &middot; days_supply</li>
+          <li>total_cost_dollars &middot; copay_dollars</li>
+          <li>plan_paid_dollars &middot; is_new_prescription</li>
+        </ul>
+      </div>
+      <div class="s-card is-fact">
+        <div class="s-type">Fact</div>
+        <div class="s-name">fct_adverse_events</div>
+        <ul class="s-fields">
+          <li>event_id (PK)</li>
+          <li>drug_id &middot; patient_id</li>
+          <li>severity &middot; severity_score (1-3)</li>
+          <li>outcome &middot; is_serious_outcome</li>
+          <li>days_to_report</li>
+        </ul>
+      </div>
+      <div class="s-card is-fact">
+        <div class="s-type">Fact</div>
+        <div class="s-name">fct_trial_outcomes</div>
+        <ul class="s-fields">
+          <li>trial_id (PK) &middot; drug_id</li>
+          <li>enrollment_pct &middot; enrollment_status</li>
+          <li>trial_duration_days</li>
+          <li>total / serious / mild events</li>
+        </ul>
+      </div>
+      <div class="s-card is-dim">
+        <div class="s-type">Dimension &middot; Contracted</div>
+        <div class="s-name">dim_drugs</div>
+        <ul class="s-fields">
+          <li>drug_id (PK) &middot; ndc_code</li>
+          <li>brand_name &middot; generic_name</li>
+          <li>therapeutic_class_name</li>
+          <li>unit_price_dollars &middot; price_tier</li>
+        </ul>
+      </div>
+      <div class="s-card is-dim">
+        <div class="s-type">Dimension</div>
+        <div class="s-name">dim_prescribers</div>
+        <ul class="s-fields">
+          <li>prescriber_id (PK) &middot; npi_number</li>
+          <li>full_name &middot; specialty</li>
+          <li>territory_name &middot; region</li>
+        </ul>
+      </div>
+      <div class="s-card is-dim">
+        <div class="s-type">Dimension</div>
+        <div class="s-name">dim_patients</div>
+        <ul class="s-fields">
+          <li>patient_id (PK) &middot; member_id</li>
+          <li>gender &middot; age_years &middot; age_group</li>
+          <li>insurance_type &middot; state</li>
+        </ul>
+      </div>
+      <div class="s-card is-fact">
+        <div class="s-type">Fact &middot; Aggregated</div>
+        <div class="s-name">fct_sales_performance</div>
+        <ul class="s-fields">
+          <li>territory_id &middot; fill_month</li>
+          <li>total_prescriptions &middot; new_prescriptions</li>
+          <li>total_revenue_dollars</li>
+          <li>unique_prescribers &middot; unique_patients</li>
+        </ul>
+      </div>
+      <div class="s-card is-snap">
+        <div class="s-type">Snapshot &middot; Check Strategy</div>
+        <div class="s-name">snap_drug_status</div>
+        <ul class="s-fields">
+          <li>drug_id &middot; approval_status</li>
+          <li>unit_price_cents</li>
+          <li>dbt_valid_from &middot; dbt_valid_to</li>
+        </ul>
+      </div>
+      <div class="s-card is-snap">
+        <div class="s-type">Snapshot &middot; Timestamp Strategy</div>
+        <div class="s-name">snap_inventory_levels</div>
+        <ul class="s-fields">
+          <li>inventory_id &middot; drug_id</li>
+          <li>quantity_on_hand &middot; quantity_reserved</li>
+          <li>dbt_valid_from &middot; dbt_valid_to</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── TESTS ───────── -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-label">Test Coverage</span>
+      <div class="section-line"></div>
+    </div>
+    <h2>77 automated tests, zero failures</h2>
+    <p class="section-subtitle">Tests run on every dbt build, catching data quality issues before they reach production dashboards.</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Test Type</th>
+          <th>What It Validates</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-mono">not_null</td>
+          <td class="td-desc">All primary keys and critical foreign keys must have values</td>
+          <td class="td-num">18</td>
+        </tr>
+        <tr>
+          <td class="td-mono">unique</td>
+          <td class="td-desc">All primary keys and natural keys (NPI, member_id) are deduplicated</td>
+          <td class="td-num">18</td>
+        </tr>
+        <tr>
+          <td class="td-mono">accepted_values</td>
+          <td class="td-desc">Enum validation on severity, phase, status, insurance, pharmacy type, age group</td>
+          <td class="td-num">8</td>
+        </tr>
+        <tr>
+          <td class="td-mono">relationships</td>
+          <td class="td-desc">Foreign key integrity for drug_id in prescriptions and adverse events</td>
+          <td class="td-num">2</td>
+        </tr>
+        <tr>
+          <td class="td-mono">dbt_utils</td>
+          <td class="td-desc">Accepted range test ensuring total_cost_dollars is non-negative</td>
+          <td class="td-num">1</td>
+        </tr>
+        <tr>
+          <td class="td-mono">singular</td>
+          <td class="td-desc">No future prescription dates; every adverse event references a valid drug</td>
+          <td class="td-num">2</td>
+        </tr>
+        <tr>
+          <td class="td-mono">source</td>
+          <td class="td-desc">Unique and not_null on all 9 raw table primary keys before transformation</td>
+          <td class="td-num">18</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ───────── STACK ───────── -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-label">Tools & Technologies</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="stack">
+      <span class="chip">PostgreSQL 18</span>
+      <span class="chip">dbt Core 1.11</span>
+      <span class="chip">dbt_utils</span>
+      <span class="chip">SQL</span>
+      <span class="chip">Jinja</span>
+      <span class="chip">Dimensional Modelling</span>
+      <span class="chip">Incremental Loads</span>
+      <span class="chip">SCD Type 2</span>
+      <span class="chip">Data Testing</span>
+      <span class="chip">Model Contracts</span>
+      <span class="chip">Source Freshness</span>
+      <span class="chip">Git</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ───────── FOOTER ───────── -->
+<div class="footer-outer">
+  <div class="wrap">
+    <footer>
+      <div class="footer-left">
+        <div class="nav-dot"></div>
+        <div>
+          <div class="footer-name">Joshua Lau</div>
+          <div class="footer-role">Junior Data Analyst &middot; Menarini UK</div>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/joshuayohanlau" class="footer-link" target="_blank">
+          GitHub
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/in/joshuayohanlau" class="footer-link" target="_blank">
+          LinkedIn
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>
+        </a>
+      </div>
+    </footer>
+  </div>
+</div>
+
+</body>
+</html>
