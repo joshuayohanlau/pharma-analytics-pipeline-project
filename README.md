@@ -175,6 +175,7 @@ dbt build           # run all models + tests in DAG order
 dbt docs generate   # generate documentation
 dbt docs serve      # view DAG + docs at localhost:8080
 ```
+<img width="976" height="859" alt="image" src="https://github.com/user-attachments/assets/264b17d5-8c77-4a5b-a548-c1eb4ef2c8be" />
 
 ## Test coverage
 
