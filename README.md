@@ -116,6 +116,7 @@ These are ephemeral models — they compile into CTEs and never create tables in
 | Marts | **table** | Pre-computed for fast queries, involves joins and calculations |
 | fct_prescriptions | **incremental** (delete+insert) | Largest fact table, only processes new records on subsequent runs |
 | Snapshots | **snapshot** | SCD Type 2 change tracking with dbt-managed valid_from/valid_to columns |
+<img width="814" height="806" alt="image" src="https://github.com/user-attachments/assets/e303d7da-d59c-4adb-b4b7-484e922595c2" />
 
 ## dbt features demonstrated
 
